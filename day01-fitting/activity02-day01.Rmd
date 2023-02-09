@@ -3,6 +3,118 @@ title: "Activity 2 - Day 1"
 output: github_document
 ---
 
-```{setup, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Task 2: Loading required Packages
+```{r}
+# Loading required packages
+library(tidyverse)
+library(tidymodels)
+library(ggplot2)
+```
+
+## Task 3: Reading the dataset from URL
+
+```{r}
+hfi <- readr::read_csv("https://www.openintro.org/data/csv/hfi.csv")
+
+hfi
+```
+1) From the dataset I could find that dimensions are **1458 X 123**. Each row represents data for each country.
+
+```{r}
+hfi_2016 <- hfi %>% filter(year == 2016)
+
+hfi_2016
+```
+
+2) These two columns **pf_score** and **pf_expression_control** are the numerical variables. However, in my opinion in order find the relation between these columns _Scatter Plot_ will be one of the suitable plot.
+
+```{r}
+ggplot(data = hfi_2016, aes(y = pf_score, x = pf_expression_control)) +
+  geom_point()
+```
+3) I can see that this scatter plot is _Linearly Plotted_
+
+
+
+## Task 4: Sum of squared residuals
+
+
+```{r}
+statsr::plot_ss(x = pf_expression_control, y = pf_score, data = hfi_2016)
+```
+
+## Task 5: Linear Model
+
+```{r}
+m1 <- lm(pf_score ~ pf_expression_control, data = hfi_2016)
+
+tidy(m1)
+```
+5. Intercept of Y-intercept is **4.28**
+6. Intercept of slope is **0.542**
+
+
+# Day 2 >> __Assessing an SLR Model__
+
+## Task -1 
+
+Successfully pulled the data from the repo.
+
+## Task 2 
+```{r}
+cor(hfi_2016$pf_expression_control,hfi_2016$pf_score)
+```
+
+1. I have received the correlation coefficient is `r cor(hfi_2016$pf_expression_control,hfi_2016$pf_score)`. As the value is more than zero, we can say that it has a significantly positive relation between these two variables.
+
+
+
+```{r}
+glance(m1)
+```
+2. r^2 value is 0.714 
+
+3. It defines that more of the observation has been explained in the model's input.
+
+```{r}
+m2 <- lm(pf_score ~ hf_score, data = hfi_2016)
+
+tidy(m2)
+```
+
+The equation which I can represent from the above values is $y = -2.027077 + 1.30 * hf_score$
+
+```{r}
+ggplot(data = hfi_2016, aes(y = pf_score, x = hf_score)) +
+  geom_point()+
+  geom_smooth(method = lm)+
+  labs(title = " Linear method for pf_score and hf_score",
+       x= "hf_score",
+       y= "pf_score")
+```
+## Task 4 - Model Diagnostics 
+
+```{r}
+m1_aug <- augment(m1)
+```
+
+```{r}
+ggplot(data = m1_aug, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  xlab("Fitted values") +
+  ylab("Residuals")
+```
+From my understanding from the above plot I can see that points are scatter all around which doesn't defines any pattern. By this I can say that the plot is linearly appropriate model.
+
+
+```{r}
+ggplot(data = m1_aug, aes(x = .resid)) +
+  geom_histogram(binwidth = 0.25) +
+  xlab("Residuals")
+```
+
